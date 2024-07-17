@@ -15,7 +15,6 @@ LIBS2   =
 all: $(PROGS)
 
 %.o: %.c
-	echo $(CFLAGS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 %: %.c
