@@ -16,6 +16,7 @@ GtkBuilder *builder;
 GtkWidget *winTray1;
 GtkImage *imgTray1;
 GtkLabel *labTray1;
+char *batteryPath;
 
 int read_int(char * file);
 char * read_word(char * file);
@@ -24,7 +25,7 @@ int read_int(char * file) {
   // read integer from single /sys/... file
   int i = 0;
   FILE *f;
-  char *fn = SCreateAppend(SYS_BATTERY_PATH,file);
+  char *fn = SCreateAppend(batteryPath,file);
   if ((f = fopen(fn,"r"))) {
     fscanf(f,"%d",&i);
     fclose(f);
@@ -36,7 +37,7 @@ int read_int(char * file) {
 char * read_word(char * file) {
   // read word from single /sys/... file
   // FIXME: this actually reads entire file! including EOL so SEqual is not working
-  char *fn = SCreateAppend(SYS_BATTERY_PATH,file);
+  char *fn = SCreateAppend(batteryPath,file);
   char *s = SCreateFromFile(fn);
   SFree(fn);
   return s;
@@ -100,18 +101,29 @@ update(GtkWidget *widget) {
 }
 
 int main (int argc, char *argv[]) {
+  batteryPath = getenv ("SYS_BATTERY_PATH");
+  if ( !(strlen (batteryPath) > 0)) {
+    batteryPath = SYS_BATTERY_PATH;
+  }
   // test if battery file exists
-  if (!g_file_test(SYS_BATTERY_PATH"charge_now", G_FILE_TEST_EXISTS)) {
-    fprintf(stderr, SYS_BATTERY_PATH"zzz\n" );
-    fprintf(stderr, "error: battery file '"SYS_BATTERY_PATH"charge_now' does not exist\n       Please change SYS_BATTERY_PATH directive in config.mk and recompile it\n");
+  if (!g_file_test(g_strconcat(batteryPath, "charge_now", NULL), G_FILE_TEST_EXISTS)) {
+    fprintf(stderr, "%szzz\n", batteryPath);
+    fprintf(stderr, "error: battery file '%scharge_now' does not exist\n"
+            "       Please change SYS_BATTERY_PATH directive in config.mk and recompile it.\n"
+            "       OR: set SYS_BATTERY_PATH\n",
+            batteryPath);
     return 1;
   }  
-  if (!g_file_test(SYS_BATTERY_PATH"charge_full", G_FILE_TEST_EXISTS)) {
-    fprintf(stderr, "error: battery file '"SYS_BATTERY_PATH"charge_full' does not exist\n       Please change SYS_BATTERY_PATH directive in config.mk and recompile it\n");
-    return 2;
+  if (!g_file_test(g_strconcat(batteryPath, "charge_full", NULL), G_FILE_TEST_EXISTS)) {
+    fprintf(stderr, "error: battery file '"SYS_BATTERY_PATH"charge_full' does not exist\n"
+            "       Please change SYS_BATTERY_PATH directive in config.mk and recompile it.\n"
+            "       OR: set SYS_BATTERY_PATH\n");
+   return 2;
   }  
-  if (!g_file_test(SYS_BATTERY_PATH"status", G_FILE_TEST_EXISTS)) {
-    fprintf(stderr, "error: battery file '"SYS_BATTERY_PATH"status' does not exist\n       Please change SYS_BATTERY_PATH directive in config.mk and recompile it\n");
+  if (!g_file_test(g_strconcat(batteryPath, "status", NULL), G_FILE_TEST_EXISTS)) {
+    fprintf(stderr, "error: battery file '"SYS_BATTERY_PATH"status' does not exist\n"
+            "       Please change SYS_BATTERY_PATH directive in config.mk and recompile it.\n"
+            "       OR: set SYS_BATTERY_PATH\n");
     return 3;
   }  
 
