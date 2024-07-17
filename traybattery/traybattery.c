@@ -102,7 +102,7 @@ update(GtkWidget *widget) {
 
 int main (int argc, char *argv[]) {
   batteryPath = getenv ("SYS_BATTERY_PATH");
-  if ( !(strlen (batteryPath) > 0)) {
+  if (batteryPath == NULL ) {
     batteryPath = SYS_BATTERY_PATH;
   }
   // test if battery file exists
